@@ -1,7 +1,10 @@
 package com.gestaohelio.controller;
 
+import com.gestaohelio.api.dto.ClienteRequestDTO;
+import com.gestaohelio.api.dto.ClienteResponseDTO;
 import com.gestaohelio.domain.model.Cliente;
 import com.gestaohelio.service.CadastroClienteService;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,22 +25,20 @@ public class ClienteController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Cliente>> listarTodos() {
-        List<Cliente> clientes = cadastroClienteService.listarTodos();
+    public ResponseEntity<List<ClienteResponseDTO>> listarTodos() {
+        List<ClienteResponseDTO> clientes = cadastroClienteService.listarTodos();
         return ResponseEntity.ok(clientes);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Cliente> buscarPorId(@PathVariable Long id) {
-        Optional<Cliente> cliente = cadastroClienteService.buscarPorId(id);
-        return cliente.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<ClienteResponseDTO> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(cadastroClienteService.buscarPorId(id));
     }
 
     @PostMapping
-    public ResponseEntity<Cliente> criar(@RequestBody Cliente cliente) {
-        Cliente novoCliente = cadastroClienteService.salvar(cliente);
-        return ResponseEntity.status(HttpStatus.CREATED).body(novoCliente);
+    public ResponseEntity<ClienteResponseDTO> criar(@RequestBody ClienteRequestDTO dto) {
+        ClienteResponseDTO novoCliente = cadastroClienteService.salvar(dto);
+        return ResponseEntity.ok(novoCliente);
     }
 
     @PutMapping("/{id}")

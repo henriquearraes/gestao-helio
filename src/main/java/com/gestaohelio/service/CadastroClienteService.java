@@ -1,5 +1,8 @@
 package com.gestaohelio.service;
 
+import com.gestaohelio.api.dto.ClienteRequestDTO;
+import com.gestaohelio.api.dto.ClienteResponseDTO;
+import com.gestaohelio.api.mapper.ClienteMapper;
 import com.gestaohelio.domain.model.Cliente;
 import com.gestaohelio.repository.ClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CadastroClienteService {
@@ -14,20 +18,30 @@ public class CadastroClienteService {
     private final ClienteRepository clienteRepository;
 
     @Autowired
+    private ClienteMapper mapper;
+
+    @Autowired
     public CadastroClienteService(ClienteRepository clienteRepository) {
         this.clienteRepository = clienteRepository;
     }
 
-    public List<Cliente> listarTodos(){
-        return clienteRepository.findAll();
+    public List<ClienteResponseDTO> listarTodos(){
+        return clienteRepository.findAll()
+                .stream()
+                .map(mapper::toResponseDto)
+                .collect(Collectors.toList());
     }
 
-    public Optional<Cliente> buscarPorId(Long id){
-        return clienteRepository.findById(id);
+    public ClienteResponseDTO buscarPorId(Long id){
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cliente não encontrado!"));
+        return mapper.toResponseDto(cliente);
     }
 
-    public Cliente salvar (Cliente cliente){
-        return clienteRepository.save(cliente);
+    public ClienteResponseDTO salvar (ClienteRequestDTO dto){
+        Cliente cliente = mapper.toEntity(dto);
+        clienteRepository.save(cliente);
+        return mapper.toResponseDto(cliente);
     }
 
     public Cliente atualizar (Long id, Cliente clienteAtualizado){
