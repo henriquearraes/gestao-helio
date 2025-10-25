@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class CaminhaoService {
+public class CadastroCaminhaoService {
 
     private final CaminhaoRepository caminhaoRepository;
     private final ClienteRepository clienteRepository;
 
     @Autowired
-    public CaminhaoService(CaminhaoRepository caminhaoRepository, ClienteRepository clienteRepository) {
+    public CadastroCaminhaoService(CaminhaoRepository caminhaoRepository, ClienteRepository clienteRepository) {
         this.caminhaoRepository = caminhaoRepository;
         this.clienteRepository = clienteRepository;
     }

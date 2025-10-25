@@ -9,12 +9,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ClienteService {
+public class CadastroClienteService {
 
     private final ClienteRepository clienteRepository;
 
     @Autowired
-    public ClienteService(ClienteRepository clienteRepository) {
+    public CadastroClienteService(ClienteRepository clienteRepository) {
         this.clienteRepository = clienteRepository;
     }
 

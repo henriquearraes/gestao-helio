@@ -1,7 +1,7 @@
 package com.gestaohelio.controller;
 
 import com.gestaohelio.domain.model.Funcionario;
-import com.gestaohelio.service.FuncionarioService;
+import com.gestaohelio.service.CadastroFuncionarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,37 +14,37 @@ import java.util.Optional;
 @RequestMapping("/funcionarios")
 public class FuncionarioController {
 
-    private final FuncionarioService funcionarioService;
+    private final CadastroFuncionarioService cadastroFuncionarioService;
 
     @Autowired
-    public FuncionarioController(FuncionarioService funcionarioService) {
-        this.funcionarioService = funcionarioService;
+    public FuncionarioController(CadastroFuncionarioService cadastroFuncionarioService) {
+        this.cadastroFuncionarioService = cadastroFuncionarioService;
     }
 
 
     @GetMapping
     public ResponseEntity<List<Funcionario>> listarTodos() {
-        List<Funcionario> funcionarios = funcionarioService.listarTodos();
+        List<Funcionario> funcionarios = cadastroFuncionarioService.listarTodos();
         return ResponseEntity.ok(funcionarios);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Funcionario> buscarPorId(@PathVariable Long id) {
-        Optional<Funcionario> funcionario = funcionarioService.buscarPorId(id);
+        Optional<Funcionario> funcionario = cadastroFuncionarioService.buscarPorId(id);
         return funcionario.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
     public ResponseEntity<Funcionario> criar(@RequestBody Funcionario funcionario) {
-        Funcionario novoFuncionario = funcionarioService.salvar(funcionario);
+        Funcionario novoFuncionario = cadastroFuncionarioService.salvar(funcionario);
         return ResponseEntity.status(HttpStatus.CREATED).body(novoFuncionario);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Funcionario> atualizar(@PathVariable Long id, @RequestBody Funcionario funcionario) {
         try {
-            Funcionario atualizado = funcionarioService.atualizar(id, funcionario);
+            Funcionario atualizado = cadastroFuncionarioService.atualizar(id, funcionario);
             return ResponseEntity.ok(atualizado);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
@@ -54,7 +54,7 @@ public class FuncionarioController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
         try {
-            funcionarioService.excluir(id);
+            cadastroFuncionarioService.excluir(id);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

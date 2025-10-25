@@ -15,16 +15,16 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ServicoService {
+public class CadastroServicoService {
 
     private final ServicoRepository servicoRepository;
     private final CaminhaoRepository caminhaoRepository;
     private final FuncionarioRepository funcionarioRepository;
 
     @Autowired
-    public ServicoService(ServicoRepository servicoRepository,
-                          CaminhaoRepository caminhaoRepository,
-                          FuncionarioRepository funcionarioRepository) {
+    public CadastroServicoService(ServicoRepository servicoRepository,
+                                  CaminhaoRepository caminhaoRepository,
+                                  FuncionarioRepository funcionarioRepository) {
         this.servicoRepository = servicoRepository;
         this.caminhaoRepository = caminhaoRepository;
         this.funcionarioRepository = funcionarioRepository;
