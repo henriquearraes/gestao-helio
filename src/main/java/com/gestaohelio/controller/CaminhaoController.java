@@ -1,5 +1,7 @@
 package com.gestaohelio.controller;
 
+import com.gestaohelio.api.dto.CaminhaoRequestDTO;
+import com.gestaohelio.api.dto.CaminhaoResponseDTO;
 import com.gestaohelio.domain.model.Caminhao;
 import com.gestaohelio.service.CadastroCaminhaoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,34 +25,37 @@ public class CaminhaoController {
 
 
     @GetMapping
-    public ResponseEntity<List<Caminhao>> listarTodos() {
-        List<Caminhao> caminhoes = cadastroCaminhaoService.listarTodos();
+    public ResponseEntity<List<CaminhaoResponseDTO>> listarTodos() {
+        List<CaminhaoResponseDTO> caminhoes = cadastroCaminhaoService.listarTodos();
         return ResponseEntity.ok(caminhoes);
     }
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<Caminhao> buscarPorId(@PathVariable Long id) {
-        Optional<Caminhao> caminhao = cadastroCaminhaoService.buscarPorId(id);
-        return caminhao.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<CaminhaoResponseDTO> buscarPorId(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(cadastroCaminhaoService.buscarPorId(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping
-    public ResponseEntity<Caminhao> criar(@RequestParam(required = false) Long clienteId, @RequestBody Caminhao caminhao) {
+    public ResponseEntity<CaminhaoResponseDTO> criar(@RequestParam(required = false) Long clienteId,
+                                                     @RequestBody CaminhaoRequestDTO dto) {
         try {
-            Caminhao novoCaminhao = cadastroCaminhaoService.salvar(caminhao, clienteId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(novoCaminhao);
+            return ResponseEntity.ok(cadastroCaminhaoService.salvar(dto, clienteId));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Caminhao> atualizar(@PathVariable Long id, @RequestBody Caminhao caminhao) {
+    public ResponseEntity<CaminhaoResponseDTO> atualizar(@PathVariable Long id,
+                                                         @RequestBody CaminhaoRequestDTO dto) {
         try {
-            Caminhao atualizado = cadastroCaminhaoService.atualizar(id, caminhao);
-            return ResponseEntity.ok(atualizado);
+            CaminhaoResponseDTO caminhao = cadastroCaminhaoService.atualizar(id, dto);
+            return ResponseEntity.ok(caminhao);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }

@@ -44,20 +44,12 @@ public class CadastroClienteService {
         return mapper.toResponseDto(cliente);
     }
 
-    public Cliente atualizar (Long id, Cliente clienteAtualizado){
-        Optional<Cliente> clienteExistente = clienteRepository.findById(id);
-
-        if(clienteExistente.isEmpty()){
-            throw new RuntimeException("Cliente não encontrado! ID: "+ id);
-        }
-
-        Cliente cliente = clienteExistente.get();
-        cliente.setNome(clienteAtualizado.getNome());
-        cliente.setEmail(clienteAtualizado.getEmail());
-        cliente.setTelefone(clienteAtualizado.getTelefone());
-        cliente.setCpfCnpj(clienteAtualizado.getCpfCnpj());
-
-        return clienteRepository.save(cliente);
+    public ClienteResponseDTO atualizar (Long id, ClienteRequestDTO dtoAtualizado){
+        Cliente cliente = mapper.toEntity(dtoAtualizado);
+        clienteRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Cliente não encontrado! ID: "+id));
+        clienteRepository.save(cliente);
+        return mapper.toResponseDto(cliente);
     }
 
     public void excluir(Long id){

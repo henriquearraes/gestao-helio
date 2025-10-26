@@ -1,5 +1,9 @@
 package com.gestaohelio.controller;
 
+import com.gestaohelio.api.dto.ClienteResponseDTO;
+import com.gestaohelio.api.dto.FuncionarioRequestDTO;
+import com.gestaohelio.api.dto.FuncionarioResponseDTO;
+import com.gestaohelio.domain.model.Cliente;
 import com.gestaohelio.domain.model.Funcionario;
 import com.gestaohelio.service.CadastroFuncionarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,29 +27,33 @@ public class FuncionarioController {
 
 
     @GetMapping
-    public ResponseEntity<List<Funcionario>> listarTodos() {
-        List<Funcionario> funcionarios = cadastroFuncionarioService.listarTodos();
+    public ResponseEntity<List<FuncionarioResponseDTO>> listarTodos() {
+        List<FuncionarioResponseDTO> funcionarios = cadastroFuncionarioService.listarTodos();
         return ResponseEntity.ok(funcionarios);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Funcionario> buscarPorId(@PathVariable Long id) {
-        Optional<Funcionario> funcionario = cadastroFuncionarioService.buscarPorId(id);
-        return funcionario.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<FuncionarioResponseDTO> buscarPorId(@PathVariable Long id) {
+        try{
+            return ResponseEntity.ok(cadastroFuncionarioService.buscarPorId(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping
-    public ResponseEntity<Funcionario> criar(@RequestBody Funcionario funcionario) {
-        Funcionario novoFuncionario = cadastroFuncionarioService.salvar(funcionario);
-        return ResponseEntity.status(HttpStatus.CREATED).body(novoFuncionario);
+    public ResponseEntity<FuncionarioResponseDTO> criar(@RequestBody FuncionarioRequestDTO dto) {
+
+        FuncionarioResponseDTO funcionario = cadastroFuncionarioService.salvar(dto);
+        return ResponseEntity.ok(funcionario);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Funcionario> atualizar(@PathVariable Long id, @RequestBody Funcionario funcionario) {
+    public ResponseEntity<FuncionarioResponseDTO> atualizar(@PathVariable Long id,
+                                                            @RequestBody FuncionarioRequestDTO dto) {
         try {
-            Funcionario atualizado = cadastroFuncionarioService.atualizar(id, funcionario);
-            return ResponseEntity.ok(atualizado);
+            FuncionarioResponseDTO funcionario = cadastroFuncionarioService.atualizar(id, dto);
+            return ResponseEntity.ok(funcionario);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }

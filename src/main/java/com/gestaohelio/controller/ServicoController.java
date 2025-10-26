@@ -1,15 +1,14 @@
 package com.gestaohelio.controller;
 
+import com.gestaohelio.api.dto.ServicoRequestDTO;
+import com.gestaohelio.api.dto.ServicoResponseDTO;
 import com.gestaohelio.domain.enums.StatusServico;
-import com.gestaohelio.domain.model.Servico;
 import com.gestaohelio.service.CadastroServicoService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/servicos")
@@ -17,38 +16,45 @@ public class ServicoController {
 
     private final CadastroServicoService cadastroServicoService;
 
+
     @Autowired
     public ServicoController(CadastroServicoService cadastroServicoService) {
         this.cadastroServicoService = cadastroServicoService;
     }
 
     @GetMapping
-    public ResponseEntity<List<Servico>> listarTodos() {
-        List<Servico> servicos = cadastroServicoService.listarTodos();
+    public ResponseEntity<List<ServicoResponseDTO>> listarTodos() {
+        List<ServicoResponseDTO> servicos = cadastroServicoService.listarTodos();
         return ResponseEntity.ok(servicos);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Servico> buscarPorId(@PathVariable Long id) {
-        Optional<Servico> servico = cadastroServicoService.buscarPorId(id);
-        return servico.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<ServicoResponseDTO> buscarPorId(@PathVariable Long id) {
+        try {
+            ServicoResponseDTO servico = cadastroServicoService.buscarPorId(id);
+            return ResponseEntity.ok(servico);
+        }catch (RuntimeException e){
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping
-    public ResponseEntity<Servico> criar(@RequestParam Long caminhaoId, @RequestParam Long funcionarioId, @RequestBody Servico servico) {
+    public ResponseEntity<ServicoResponseDTO> criar(@RequestParam Long caminhaoId,
+                                                    @RequestParam Long funcionarioId,
+                                                    @RequestBody ServicoRequestDTO dto) {
         try {
-            Servico novoServico = cadastroServicoService.salvar(servico, caminhaoId, funcionarioId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(novoServico);
+            ServicoResponseDTO servico = cadastroServicoService.salvar(dto, caminhaoId, funcionarioId);
+            return ResponseEntity.ok(servico);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Servico> atualizar(@PathVariable Long id, @RequestBody Servico servicoAtualizado) {
+    public ResponseEntity<ServicoResponseDTO> atualizar(@PathVariable Long id,
+                                                        @RequestBody ServicoRequestDTO dto) {
         try {
-            Servico atualizado = cadastroServicoService.atualizar(id, servicoAtualizado);
+            ServicoResponseDTO atualizado = cadastroServicoService.atualizar(id, dto);
             return ResponseEntity.ok(atualizado);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
@@ -66,8 +72,8 @@ public class ServicoController {
     }
 
     @GetMapping("/status")
-    public ResponseEntity<List<Servico>> listarPorStatus(@RequestParam StatusServico status) {
-        List<Servico> servicos = cadastroServicoService.listarPorStatus(status);
+    public ResponseEntity<List<ServicoResponseDTO>> listarPorStatus(@RequestParam StatusServico status) {
+        List<ServicoResponseDTO> servicos = cadastroServicoService.listarPorStatus(status);
         return ResponseEntity.ok(servicos);
     }
 }

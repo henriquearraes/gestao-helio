@@ -1,5 +1,8 @@
 package com.gestaohelio.service;
 
+import com.gestaohelio.api.dto.ServicoRequestDTO;
+import com.gestaohelio.api.dto.ServicoResponseDTO;
+import com.gestaohelio.api.mapper.ServicoMapper;
 import com.gestaohelio.domain.enums.StatusServico;
 import com.gestaohelio.domain.model.Caminhao;
 import com.gestaohelio.domain.model.Funcionario;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CadastroServicoService {
@@ -20,6 +24,8 @@ public class CadastroServicoService {
     private final ServicoRepository servicoRepository;
     private final CaminhaoRepository caminhaoRepository;
     private final FuncionarioRepository funcionarioRepository;
+    @Autowired
+    private ServicoMapper mapper;
 
     @Autowired
     public CadastroServicoService(ServicoRepository servicoRepository,
@@ -30,61 +36,60 @@ public class CadastroServicoService {
         this.funcionarioRepository = funcionarioRepository;
     }
 
-    public List<Servico> listarTodos() {
-        return servicoRepository.findAll();
+    public List<ServicoResponseDTO> listarTodos() {
+        return servicoRepository.findAll()
+                .stream()
+                .map(mapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
-    public Optional<Servico> buscarPorId(Long id) {
-        return servicoRepository.findById(id);
-    }
-
-
-    public Servico salvar(Servico servico, Long caminhaoId, Long funcionarioId) {
-        // vincula caminhao
-        Optional<Caminhao> caminhao = caminhaoRepository.findById(caminhaoId);
-        if (caminhao.isEmpty()) {
-            throw new RuntimeException("Caminhão não encontrado com ID: " + caminhaoId);
-        }
-
-        // vincula funcionario
-        Optional<Funcionario> funcionario = funcionarioRepository.findById(funcionarioId);
-        if (funcionario.isEmpty()) {
-            throw new RuntimeException("Funcionário não encontrado com ID: " + funcionarioId);
-        }
-
-        servico.setCaminhao(caminhao.get());
-        servico.setFuncionario(funcionario.get());
-        servico.setStatus(StatusServico.ABERTO);
-        servico.setDataEntrada(LocalDateTime.now());
-        servico.setDataSaida(null);
-
-        return servicoRepository.save(servico);
+    public ServicoResponseDTO buscarPorId(Long id) {
+        Servico servico = servicoRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Serviço não encontrado! ID: "+id));
+        return mapper.toResponseDTO(servico);
     }
 
 
-    public Servico atualizar(Long id, Servico servicoAtualizado) {
-        Optional<Servico> servicoExistente = servicoRepository.findById(id);
+    public ServicoResponseDTO salvar(ServicoRequestDTO dto, Long caminhaoId, Long funcionarioId) {
 
-        if (servicoExistente.isEmpty()) {
-            throw new RuntimeException("Serviço não encontrado com ID: " + id);
-        }
+            // vincula caminhao
+            Optional<Caminhao> caminhao = caminhaoRepository.findById(caminhaoId);
+            if (caminhao.isEmpty()) {
+                throw new RuntimeException("Caminhão não encontrado com ID: " + caminhaoId);
+            }
 
-        Servico servico = servicoExistente.get();
+            // vincula funcionario
+            Optional<Funcionario> funcionario = funcionarioRepository.findById(funcionarioId);
+            if (funcionario.isEmpty()) {
+                throw new RuntimeException("Funcionário não encontrado com ID: " + funcionarioId);
+            }
 
-        servico.setDescricao(servicoAtualizado.getDescricao());
-        servico.setValor(servicoAtualizado.getValor());
-        servico.setStatus(servicoAtualizado.getStatus());
+            Servico servico = mapper.toEntity(dto);
+            servico.setCaminhao(caminhao.get());
+            servico.setFuncionario(funcionario.get());
+            servicoRepository.save(servico);
+            return mapper.toResponseDTO(servico);
+
+    }
+
+
+    public ServicoResponseDTO atualizar(Long id, ServicoRequestDTO dto) {
+        Servico servicoExistente = mapper.toEntity(dto);
+
+        servicoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Servico não encontrado! ID: "+id));
 
         // regra: se o status for CONCLUIDO, definir data de saida
-        if (servicoAtualizado.getStatus() == StatusServico.CONCLUIDO) {
-            if (servico.getDataEntrada() != null &&
-                    LocalDateTime.now().isBefore(servico.getDataEntrada())) {
+        if (servicoExistente.getStatus() == StatusServico.CONCLUIDO) {
+            if (servicoExistente.getDataEntrada() != null &&
+                    LocalDateTime.now().isBefore(servicoExistente.getDataEntrada())) {
                 throw new RuntimeException("A data de saída não pode ser anterior à data de entrada.");
             }
-            servico.setDataSaida(LocalDateTime.now());
+            servicoExistente.setDataSaida(LocalDateTime.now());
         }
 
-        return servicoRepository.save(servico);
+        servicoRepository.save(servicoExistente);
+        return mapper.toResponseDTO(servicoExistente);
     }
 
 
@@ -96,7 +101,7 @@ public class CadastroServicoService {
     }
 
 
-    public List<Servico> listarPorStatus(StatusServico status) {
+    public List<ServicoResponseDTO> listarPorStatus(StatusServico status) {
         return servicoRepository.findByStatus(status);
     }
 }

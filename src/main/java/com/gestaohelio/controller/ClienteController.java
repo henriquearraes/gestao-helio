@@ -32,7 +32,11 @@ public class ClienteController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ClienteResponseDTO> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(cadastroClienteService.buscarPorId(id));
+        try {
+            return ResponseEntity.ok(cadastroClienteService.buscarPorId(id));
+        }catch (RuntimeException e){
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping
@@ -42,9 +46,10 @@ public class ClienteController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Cliente> atualizar(@PathVariable Long id, @RequestBody Cliente cliente) {
+    public ResponseEntity<ClienteResponseDTO> atualizar(@PathVariable Long id,
+                                                        @RequestBody ClienteRequestDTO dto) {
         try {
-            Cliente atualizado = cadastroClienteService.atualizar(id, cliente);
+            ClienteResponseDTO atualizado = cadastroClienteService.atualizar(id, dto);
             return ResponseEntity.ok(atualizado);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

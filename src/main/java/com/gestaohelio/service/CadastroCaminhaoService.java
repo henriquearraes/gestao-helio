@@ -1,5 +1,8 @@
 package com.gestaohelio.service;
 
+import com.gestaohelio.api.dto.CaminhaoRequestDTO;
+import com.gestaohelio.api.dto.CaminhaoResponseDTO;
+import com.gestaohelio.api.mapper.CaminhaoMapper;
 import com.gestaohelio.domain.model.Caminhao;
 import com.gestaohelio.domain.model.Cliente;
 import com.gestaohelio.repository.CaminhaoRepository;
@@ -9,12 +12,15 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CadastroCaminhaoService {
 
     private final CaminhaoRepository caminhaoRepository;
     private final ClienteRepository clienteRepository;
+    @Autowired
+    private CaminhaoMapper mapper;
 
     @Autowired
     public CadastroCaminhaoService(CaminhaoRepository caminhaoRepository, ClienteRepository clienteRepository) {
@@ -22,38 +28,47 @@ public class CadastroCaminhaoService {
         this.clienteRepository = clienteRepository;
     }
 
-    public List<Caminhao> listarTodos() {
-        return caminhaoRepository.findAll();
+    public List<CaminhaoResponseDTO> listarTodos() {
+        return caminhaoRepository.findAll()
+                .stream()
+                .map(mapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
-    public Optional<Caminhao> buscarPorId(Long id) {
-        return caminhaoRepository.findById(id);
+    public CaminhaoResponseDTO buscarPorId(Long id) {
+        Caminhao caminhao = caminhaoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Caminhão não encontrado com ID: "+id));
+        return mapper.toResponseDTO(caminhao);
     }
 
-    public Caminhao salvar(Caminhao caminhao, Long clienteId) {
-        if (clienteId != null) {
-            Optional<Cliente> cliente = clienteRepository.findById(clienteId);
-            if (cliente.isEmpty()) {
-                throw new RuntimeException("Cliente não encontrado com ID: " + clienteId);
+    public CaminhaoResponseDTO salvar(CaminhaoRequestDTO dto,
+                                      Long clienteId) {
+        try {
+            if (clienteId != null) {
+                Optional<Cliente> cliente = clienteRepository.findById(clienteId);
+                if (cliente.isEmpty()) {
+                    throw new RuntimeException("Cliente não encontrado com ID: " + clienteId);
+                }
+                Caminhao caminhao = mapper.toEntity(dto);
+                caminhao.setCliente(cliente.get());
+                caminhaoRepository.save(caminhao);
+                return mapper.toResponseDTO(caminhao);
             }
-            caminhao.setCliente(cliente.get());
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Id do Cliente não pode ser nulo!");
         }
-        return caminhaoRepository.save(caminhao);
+        Caminhao caminhao = mapper.toEntity(dto);
+        caminhaoRepository.save(caminhao);
+        return mapper.toResponseDTO(caminhao);
+
     }
 
-    public Caminhao atualizar(Long id, Caminhao caminhaoAtualizado) {
-        Optional<Caminhao> caminhaoExistente = caminhaoRepository.findById(id);
-
-        if (caminhaoExistente.isEmpty()) {
-            throw new RuntimeException("Caminhão não encontrado com ID: " + id);
-        }
-
-        Caminhao caminhao = caminhaoExistente.get();
-        caminhao.setPlaca(caminhaoAtualizado.getPlaca());
-        caminhao.setModelo(caminhaoAtualizado.getModelo());
-        caminhao.setCliente(caminhaoAtualizado.getCliente());
-
-        return caminhaoRepository.save(caminhao);
+    public CaminhaoResponseDTO atualizar(Long id, CaminhaoRequestDTO dtoAtualizado) {
+        Caminhao caminhao = mapper.toEntity(dtoAtualizado);
+        caminhaoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Caminhão não encontrado! ID: "+id));
+        caminhaoRepository.save(caminhao);
+        return mapper.toResponseDTO(caminhao);
     }
 
     public void excluir(Long id) {
