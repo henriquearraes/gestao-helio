@@ -15,12 +15,12 @@ import java.util.stream.Collectors;
 @Service
 public class CadastroFuncionarioService {
     private final FuncionarioRepository funcionarioRepository;
-    @Autowired
-    private FuncionarioMapper mapper;
+    private final FuncionarioMapper mapper;
 
     @Autowired
-    public CadastroFuncionarioService(FuncionarioRepository funcionarioRepository) {
+    public CadastroFuncionarioService(FuncionarioRepository funcionarioRepository, FuncionarioMapper mapper) {
         this.funcionarioRepository = funcionarioRepository;
+        this.mapper = mapper;
     }
 
     public List<FuncionarioResponseDTO> listarTodos() {

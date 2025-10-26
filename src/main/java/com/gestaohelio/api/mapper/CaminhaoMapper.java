@@ -5,8 +5,10 @@ import com.gestaohelio.api.dto.CaminhaoResponseDTO;
 import com.gestaohelio.domain.model.Caminhao;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.stereotype.Component;
 
-@Mapper (componentModel = "spring")
+
+@Mapper(componentModel = "spring")
 public interface CaminhaoMapper {
 
     //Converte DTO de Entrada para Entidade

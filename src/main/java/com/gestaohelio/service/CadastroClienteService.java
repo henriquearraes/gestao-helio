@@ -16,13 +16,12 @@ import java.util.stream.Collectors;
 public class CadastroClienteService {
 
     private final ClienteRepository clienteRepository;
+    private final ClienteMapper mapper;
 
     @Autowired
-    private ClienteMapper mapper;
-
-    @Autowired
-    public CadastroClienteService(ClienteRepository clienteRepository) {
+    public CadastroClienteService(ClienteRepository clienteRepository, ClienteMapper mapper) {
         this.clienteRepository = clienteRepository;
+        this.mapper = mapper;
     }
 
     public List<ClienteResponseDTO> listarTodos(){

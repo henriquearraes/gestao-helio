@@ -19,13 +19,15 @@ public class CadastroCaminhaoService {
 
     private final CaminhaoRepository caminhaoRepository;
     private final ClienteRepository clienteRepository;
-    @Autowired
-    private CaminhaoMapper mapper;
+    private final CaminhaoMapper mapper;
 
     @Autowired
-    public CadastroCaminhaoService(CaminhaoRepository caminhaoRepository, ClienteRepository clienteRepository) {
+    public CadastroCaminhaoService(CaminhaoRepository caminhaoRepository,
+                                   ClienteRepository clienteRepository,
+                                   CaminhaoMapper mapper) {
         this.caminhaoRepository = caminhaoRepository;
         this.clienteRepository = clienteRepository;
+        this.mapper = mapper;
     }
 
     public List<CaminhaoResponseDTO> listarTodos() {

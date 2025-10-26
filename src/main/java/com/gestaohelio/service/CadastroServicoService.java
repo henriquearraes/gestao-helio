@@ -24,16 +24,17 @@ public class CadastroServicoService {
     private final ServicoRepository servicoRepository;
     private final CaminhaoRepository caminhaoRepository;
     private final FuncionarioRepository funcionarioRepository;
-    @Autowired
-    private ServicoMapper mapper;
+    private final ServicoMapper mapper;
 
     @Autowired
     public CadastroServicoService(ServicoRepository servicoRepository,
                                   CaminhaoRepository caminhaoRepository,
-                                  FuncionarioRepository funcionarioRepository) {
+                                  FuncionarioRepository funcionarioRepository,
+                                  ServicoMapper mapper) {
         this.servicoRepository = servicoRepository;
         this.caminhaoRepository = caminhaoRepository;
         this.funcionarioRepository = funcionarioRepository;
+        this.mapper = mapper;
     }
 
     public List<ServicoResponseDTO> listarTodos() {
