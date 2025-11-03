@@ -3,6 +3,7 @@ package com.gestaohelio.service;
 import com.gestaohelio.api.dto.FuncionarioRequestDTO;
 import com.gestaohelio.api.dto.FuncionarioResponseDTO;
 import com.gestaohelio.api.mapper.FuncionarioMapper;
+import com.gestaohelio.common.exceptions.ElementoNaoEncontradoException;
 import com.gestaohelio.domain.model.Funcionario;
 import com.gestaohelio.repository.FuncionarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ public class CadastroFuncionarioService {
 
     public FuncionarioResponseDTO buscarPorId(Long id) {
         Funcionario funcionario = funcionarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException ("Funcionário não encontrado! ID: "+id));
+                .orElseThrow(ElementoNaoEncontradoException::new);
         return mapper.toResponseDTO(funcionario);
     }
 
@@ -45,14 +46,14 @@ public class CadastroFuncionarioService {
     public FuncionarioResponseDTO atualizar(Long id, FuncionarioRequestDTO dto) {
         Funcionario funcionario = mapper.toEntity(dto);
         funcionarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Funcionário não encontrado! ID: "+id));
+                .orElseThrow(ElementoNaoEncontradoException::new);
         funcionarioRepository.save(funcionario);
         return mapper.toResponseDTO(funcionario);
     }
 
     public void excluir(Long id) {
         if (!funcionarioRepository.existsById(id)) {
-            throw new RuntimeException("Funcionário não encontrado! ID: " + id);
+            throw new ElementoNaoEncontradoException();
         }
         funcionarioRepository.deleteById(id);
     }

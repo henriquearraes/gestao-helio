@@ -3,6 +3,8 @@ package com.gestaohelio.service;
 import com.gestaohelio.api.dto.ServicoRequestDTO;
 import com.gestaohelio.api.dto.ServicoResponseDTO;
 import com.gestaohelio.api.mapper.ServicoMapper;
+import com.gestaohelio.common.exceptions.ElementoNaoEncontradoException;
+import com.gestaohelio.common.exceptions.NaoPodeSerDataAnteriorException;
 import com.gestaohelio.domain.enums.StatusServico;
 import com.gestaohelio.domain.model.Caminhao;
 import com.gestaohelio.domain.model.Funcionario;
@@ -46,7 +48,7 @@ public class CadastroServicoService {
 
     public ServicoResponseDTO buscarPorId(Long id) {
         Servico servico = servicoRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Serviço não encontrado! ID: "+id));
+                        .orElseThrow(ElementoNaoEncontradoException::new);
         return mapper.toResponseDTO(servico);
     }
 
@@ -56,13 +58,13 @@ public class CadastroServicoService {
             // vincula caminhao
             Optional<Caminhao> caminhao = caminhaoRepository.findById(caminhaoId);
             if (caminhao.isEmpty()) {
-                throw new RuntimeException("Caminhão não encontrado com ID: " + caminhaoId);
+                throw new ElementoNaoEncontradoException();
             }
 
             // vincula funcionario
             Optional<Funcionario> funcionario = funcionarioRepository.findById(funcionarioId);
             if (funcionario.isEmpty()) {
-                throw new RuntimeException("Funcionário não encontrado com ID: " + funcionarioId);
+                throw new ElementoNaoEncontradoException();
             }
 
             Servico servico = mapper.toEntity(dto);
@@ -78,13 +80,13 @@ public class CadastroServicoService {
         Servico servicoExistente = mapper.toEntity(dto);
 
         servicoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Servico não encontrado! ID: "+id));
+                .orElseThrow(ElementoNaoEncontradoException::new);
 
         // regra: se o status for CONCLUIDO, definir data de saida
         if (servicoExistente.getStatus() == StatusServico.CONCLUIDO) {
             if (servicoExistente.getDataEntrada() != null &&
                     LocalDateTime.now().isBefore(servicoExistente.getDataEntrada())) {
-                throw new RuntimeException("A data de saída não pode ser anterior à data de entrada.");
+                throw new NaoPodeSerDataAnteriorException();
             }
             servicoExistente.setDataSaida(LocalDateTime.now());
         }
@@ -96,7 +98,7 @@ public class CadastroServicoService {
 
     public void excluir(Long id) {
         if (!servicoRepository.existsById(id)) {
-            throw new RuntimeException("Serviço não encontrado com ID: " + id);
+            throw new ElementoNaoEncontradoException();
         }
         servicoRepository.deleteById(id);
     }

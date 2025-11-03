@@ -3,6 +3,7 @@ package com.gestaohelio.service;
 import com.gestaohelio.api.dto.CaminhaoRequestDTO;
 import com.gestaohelio.api.dto.CaminhaoResponseDTO;
 import com.gestaohelio.api.mapper.CaminhaoMapper;
+import com.gestaohelio.common.exceptions.ElementoNaoEncontradoException;
 import com.gestaohelio.domain.model.Caminhao;
 import com.gestaohelio.domain.model.Cliente;
 import com.gestaohelio.repository.CaminhaoRepository;
@@ -39,7 +40,7 @@ public class CadastroCaminhaoService {
 
     public CaminhaoResponseDTO buscarPorId(Long id) {
         Caminhao caminhao = caminhaoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Caminhão não encontrado com ID: "+id));
+                .orElseThrow(ElementoNaoEncontradoException::new);
         return mapper.toResponseDTO(caminhao);
     }
 
@@ -49,15 +50,15 @@ public class CadastroCaminhaoService {
             if (clienteId != null) {
                 Optional<Cliente> cliente = clienteRepository.findById(clienteId);
                 if (cliente.isEmpty()) {
-                    throw new RuntimeException("Cliente não encontrado com ID: " + clienteId);
+                    throw new ElementoNaoEncontradoException();
                 }
                 Caminhao caminhao = mapper.toEntity(dto);
                 caminhao.setCliente(cliente.get());
                 caminhaoRepository.save(caminhao);
                 return mapper.toResponseDTO(caminhao);
             }
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Id do Cliente não pode ser nulo!");
+        } catch (ElementoNaoEncontradoException e) {
+            throw new ElementoNaoEncontradoException();
         }
         Caminhao caminhao = mapper.toEntity(dto);
         caminhaoRepository.save(caminhao);
@@ -68,14 +69,14 @@ public class CadastroCaminhaoService {
     public CaminhaoResponseDTO atualizar(Long id, CaminhaoRequestDTO dtoAtualizado) {
         Caminhao caminhao = mapper.toEntity(dtoAtualizado);
         caminhaoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Caminhão não encontrado! ID: "+id));
+                .orElseThrow(ElementoNaoEncontradoException::new);
         caminhaoRepository.save(caminhao);
         return mapper.toResponseDTO(caminhao);
     }
 
     public void excluir(Long id) {
         if (!caminhaoRepository.existsById(id)) {
-            throw new RuntimeException("Caminhão não encontrado com ID: " + id);
+            throw new ElementoNaoEncontradoException();
         }
         caminhaoRepository.deleteById(id);
     }

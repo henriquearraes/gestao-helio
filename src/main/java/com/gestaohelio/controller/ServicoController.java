@@ -4,6 +4,7 @@ import com.gestaohelio.api.dto.ServicoRequestDTO;
 import com.gestaohelio.api.dto.ServicoResponseDTO;
 import com.gestaohelio.domain.enums.StatusServico;
 import com.gestaohelio.service.CadastroServicoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,45 +31,29 @@ public class ServicoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ServicoResponseDTO> buscarPorId(@PathVariable Long id) {
-        try {
             ServicoResponseDTO servico = cadastroServicoService.buscarPorId(id);
             return ResponseEntity.ok(servico);
-        }catch (RuntimeException e){
-            return ResponseEntity.notFound().build();
-        }
     }
 
     @PostMapping
     public ResponseEntity<ServicoResponseDTO> criar(@RequestParam Long caminhaoId,
                                                     @RequestParam Long funcionarioId,
-                                                    @RequestBody ServicoRequestDTO dto) {
-        try {
+                                                    @RequestBody @Valid ServicoRequestDTO dto) {
             ServicoResponseDTO servico = cadastroServicoService.salvar(dto, caminhaoId, funcionarioId);
             return ResponseEntity.ok(servico);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
-        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ServicoResponseDTO> atualizar(@PathVariable Long id,
-                                                        @RequestBody ServicoRequestDTO dto) {
-        try {
+                                                        @RequestBody @Valid ServicoRequestDTO dto) {
             ServicoResponseDTO atualizado = cadastroServicoService.atualizar(id, dto);
             return ResponseEntity.ok(atualizado);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        try {
             cadastroServicoService.excluir(id);
             return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
     }
 
     @GetMapping("/status")

@@ -3,6 +3,7 @@ package com.gestaohelio.service;
 import com.gestaohelio.api.dto.ClienteRequestDTO;
 import com.gestaohelio.api.dto.ClienteResponseDTO;
 import com.gestaohelio.api.mapper.ClienteMapper;
+import com.gestaohelio.common.exceptions.ElementoNaoEncontradoException;
 import com.gestaohelio.domain.model.Cliente;
 import com.gestaohelio.repository.ClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ public class CadastroClienteService {
 
     public ClienteResponseDTO buscarPorId(Long id){
         Cliente cliente = clienteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado!"));
+                .orElseThrow( ElementoNaoEncontradoException::new);
         return mapper.toResponseDto(cliente);
     }
 
@@ -46,14 +47,14 @@ public class CadastroClienteService {
     public ClienteResponseDTO atualizar (Long id, ClienteRequestDTO dtoAtualizado){
         Cliente cliente = mapper.toEntity(dtoAtualizado);
         clienteRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Cliente não encontrado! ID: "+id));
+                        .orElseThrow(ElementoNaoEncontradoException::new);
         clienteRepository.save(cliente);
         return mapper.toResponseDto(cliente);
     }
 
     public void excluir(Long id){
         if (!clienteRepository.existsById(id)){
-            throw new RuntimeException("Cliente não encontrado! ID: "+id);
+            throw new ElementoNaoEncontradoException();
         }
         clienteRepository.deleteById(id);
     }

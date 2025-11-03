@@ -4,6 +4,7 @@ import com.gestaohelio.api.dto.CaminhaoRequestDTO;
 import com.gestaohelio.api.dto.CaminhaoResponseDTO;
 import com.gestaohelio.domain.model.Caminhao;
 import com.gestaohelio.service.CadastroCaminhaoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,41 +34,25 @@ public class CaminhaoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<CaminhaoResponseDTO> buscarPorId(@PathVariable Long id) {
-        try {
             return ResponseEntity.ok(cadastroCaminhaoService.buscarPorId(id));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
     }
 
     @PostMapping
     public ResponseEntity<CaminhaoResponseDTO> criar(@RequestParam(required = false) Long clienteId,
-                                                     @RequestBody CaminhaoRequestDTO dto) {
-        try {
+                                                     @RequestBody @Valid CaminhaoRequestDTO dto) {
             return ResponseEntity.ok(cadastroCaminhaoService.salvar(dto, clienteId));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
-        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<CaminhaoResponseDTO> atualizar(@PathVariable Long id,
-                                                         @RequestBody CaminhaoRequestDTO dto) {
-        try {
+                                                         @RequestBody @Valid CaminhaoRequestDTO dto) {
             CaminhaoResponseDTO caminhao = cadastroCaminhaoService.atualizar(id, dto);
             return ResponseEntity.ok(caminhao);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        try {
             cadastroCaminhaoService.excluir(id);
             return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
     }
 }

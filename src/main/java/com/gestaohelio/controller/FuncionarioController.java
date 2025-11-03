@@ -6,6 +6,7 @@ import com.gestaohelio.api.dto.FuncionarioResponseDTO;
 import com.gestaohelio.domain.model.Cliente;
 import com.gestaohelio.domain.model.Funcionario;
 import com.gestaohelio.service.CadastroFuncionarioService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,38 +35,25 @@ public class FuncionarioController {
 
     @GetMapping("/{id}")
     public ResponseEntity<FuncionarioResponseDTO> buscarPorId(@PathVariable Long id) {
-        try{
             return ResponseEntity.ok(cadastroFuncionarioService.buscarPorId(id));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
     }
 
     @PostMapping
-    public ResponseEntity<FuncionarioResponseDTO> criar(@RequestBody FuncionarioRequestDTO dto) {
-
+    public ResponseEntity<FuncionarioResponseDTO> criar(@RequestBody @Valid FuncionarioRequestDTO dto) {
         FuncionarioResponseDTO funcionario = cadastroFuncionarioService.salvar(dto);
         return ResponseEntity.ok(funcionario);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<FuncionarioResponseDTO> atualizar(@PathVariable Long id,
-                                                            @RequestBody FuncionarioRequestDTO dto) {
-        try {
+                                                            @RequestBody @Valid FuncionarioRequestDTO dto) {
             FuncionarioResponseDTO funcionario = cadastroFuncionarioService.atualizar(id, dto);
             return ResponseEntity.ok(funcionario);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        try {
             cadastroFuncionarioService.excluir(id);
             return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
     }
 }

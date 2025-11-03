@@ -2,8 +2,10 @@ package com.gestaohelio.controller;
 
 import com.gestaohelio.api.dto.ClienteRequestDTO;
 import com.gestaohelio.api.dto.ClienteResponseDTO;
+import com.gestaohelio.common.exceptions.ElementoNaoEncontradoException;
 import com.gestaohelio.domain.model.Cliente;
 import com.gestaohelio.service.CadastroClienteService;
+import jakarta.validation.Valid;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,37 +34,26 @@ public class ClienteController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ClienteResponseDTO> buscarPorId(@PathVariable Long id) {
-        try {
+
             return ResponseEntity.ok(cadastroClienteService.buscarPorId(id));
-        }catch (RuntimeException e){
-            return ResponseEntity.notFound().build();
-        }
     }
 
     @PostMapping
-    public ResponseEntity<ClienteResponseDTO> criar(@RequestBody ClienteRequestDTO dto) {
+    public ResponseEntity<ClienteResponseDTO> criar(@RequestBody @Valid ClienteRequestDTO dto) {
         ClienteResponseDTO novoCliente = cadastroClienteService.salvar(dto);
         return ResponseEntity.ok(novoCliente);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ClienteResponseDTO> atualizar(@PathVariable Long id,
-                                                        @RequestBody ClienteRequestDTO dto) {
-        try {
+                                                        @RequestBody @Valid ClienteRequestDTO dto) {
             ClienteResponseDTO atualizado = cadastroClienteService.atualizar(id, dto);
             return ResponseEntity.ok(atualizado);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        try {
             cadastroClienteService.excluir(id);
             return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
     }
 }
